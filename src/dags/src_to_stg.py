@@ -7,14 +7,18 @@ from airflow.decorators import dag
 from airflow.models import Variable
 from airflow.operators.python import PythonOperator
 
-HOST = 'vertica.tgcloudenv.ru'
-PORT = '5433'
-USER = 'farruhrusyandexru'
-PASSWORD = 'JLlMNB9gxWc5A0h'
+HOST = Variable.get("vertica_host")
+PORT = Variable.get("vertica_port")
+USER = Variable.get("vertica_user")
+PASSWORD = Variable.get("vertica_password")
+AWS_ACCESS_KEY_ID = Variable.get("aws_access_key_id")
+AWS_SECRET_ACCESS_KEY = Variable.get("aws_secret_access_key")
 
 conn_info = {
-    "host": HOST, "port": PORT,
-    "user": USER, "password": PASSWORD,
+    "host": HOST,
+    "port": PORT,
+    "user": USER,
+    "password": PASSWORD,
     "autocommit": True,
 }
 
@@ -24,8 +28,8 @@ def fetch_s3_file(bucket: str, key: str):
     s3_client = session.client(
         service_name="s3",
         endpoint_url="https://storage.yandexcloud.net",
-        aws_access_key_id='YCAJEWXOyY8Bmyk2eJL-hlt2K',
-        aws_secret_access_key='YCPs52ajb2jNXxOUsL4-pFDL1HnV2BCPd928_ZoA',
+        aws_access_key_id=AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
     )
 
     s3_client.download_file(Bucket=bucket, Key=key,

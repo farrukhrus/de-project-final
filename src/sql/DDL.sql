@@ -37,3 +37,57 @@ create table FARRUHRUSYANDEXRU__DWH.global_metrics(
 )
 order by date_update, currency_from
 segmented by hash(date_update, currency_from) all nodes;
+
+
+--- projections
+-- FARRUHRUSYANDEXRU__STAGING.currencies_b0 definition
+CREATE PROJECTION FARRUHRUSYANDEXRU__STAGING.currencies_b0 /*+basename(currencies),createtype(P)*/ 
+(
+ currency_code,
+ currency_code_with,
+ date_update,
+ currency_with_div
+)
+AS
+ SELECT currencies.currency_code,
+        currencies.currency_code_with,
+        currencies.date_update,
+        currencies.currency_with_div
+ FROM FARRUHRUSYANDEXRU__STAGING.currencies
+ ORDER BY currencies.currency_code,
+          currencies.currency_code_with,
+          currencies.date_update
+SEGMENTED BY hash(currencies.currency_code, currencies.currency_code_with, currencies.date_update) ALL NODES OFFSET 0;
+SELECT MARK_DESIGN_KSAFE(1);
+
+-- FARRUHRUSYANDEXRU__STAGING.transactions_b0 definition
+CREATE PROJECTION FARRUHRUSYANDEXRU__STAGING.transactions_b0 /*+basename(transactions),createtype(P)*/ 
+(
+ operation_id,
+ account_number_from,
+ account_number_to,
+ currency_code,
+ country,
+ status,
+ transaction_type,
+ amount,
+ transaction_dt
+)
+AS
+ SELECT transactions.operation_id,
+        transactions.account_number_from,
+        transactions.account_number_to,
+        transactions.currency_code,
+        transactions.country,
+        transactions.status,
+        transactions.transaction_type,
+        transactions.amount,
+        transactions.transaction_dt
+ FROM FARRUHRUSYANDEXRU__STAGING.transactions
+ ORDER BY transactions.transaction_dt,
+          transactions.operation_id,
+          transactions.status
+SEGMENTED BY hash(transactions.operation_id, transactions.status) ALL NODES OFFSET 0;
+
+
+SELECT MARK_DESIGN_KSAFE(1);
